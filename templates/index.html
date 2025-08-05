@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Ondertitel Downloader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --bg-light: #f9f9f9;
+            --bg-dark: #121212;
+            --text-light: #000;
+            --text-dark: #eee;
+            --card-light: #fff;
+            --card-dark: #1e1e1e;
+            --accent: #007bff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            margin: 0;
+            padding: 2em;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        form {
+            background-color: var(--card-light);
+            padding: 2em;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        body.dark form {
+            background-color: var(--card-dark);
+            border-color: #333;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1em;
+        }
+
+        .toggle-button {
+            background: none;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-container">
+        <button id="darkModeToggle" class="toggle-button">🌙 Donkere modus</button>
+    </div>
+
+    <h2>Download YouTube-ondertitels</h2>
+    <form action="/download" method="post">
+        <label for="url">YouTube-link:</label>
+        <input type="text" name="url" id="url" placeholder="Plak hier je YouTube-link" required>
+
+        <label for="format">Kies formaat:</label>
+        <select name="format" id="format">
+            <option value="srt">.srt (met tijdcodes)</option>
+            <option value="txt">.txt (alleen tekst)</option>
+        </select>
+
+        <button type="submit">Download ondertitels</button>
+    </form>
+
+    <script>
+        const body = document.body;
+        const toggle = document.getElementById('darkModeToggle');
+
+        // Herstel vorige keuze uit localStorage
+        if (localStorage.getItem("darkMode") === "true") {
+            body.classList.add("dark");
+            toggle.textContent = "☀️ Licht modus";
+        }
+
+        toggle.addEventListener("click", () => {
+            body.classList.toggle("dark");
+            const isDark = body.classList.contains("dark");
+            localStorage.setItem("darkMode", isDark);
+            toggle.textContent = isDark ? "☀️ Licht modus" : "🌙 Donkere modus";
+        });
+    </script>
+</body>
+</html>
