@@ -22,51 +22,28 @@ def download():
     if not url:
         return "Geen URL ingevoerd", 400
 
-    os.makedirs("downloads", exist_ok=True)
-    taal = "nl"
-    ydl_format = "srt"  # yt-dlp gebruikt o.a. srt, vtt
-
-    srt_pad = f"downloads/video.{taal}.{ydl_format}"
-    txt_pad = f"downloads/video.{taal}.txt"
-
     ydl_opts = {
-        'skip_download': True,
         'writesubtitles': True,
-        'writeautomaticsub': True,
-        'subtitleslangs': [taal],
-        'subtitlesformat': ydl_format,
-        'outtmpl': 'downloads/video.%(ext)s'
+        'skip_download': True,
+        'subtitleslangs': ['nl', 'en'],
+        'subtitlesformat': formaat,
+        'outtmpl': '%(title)s.%(ext)s',
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            titel = info.get("title", "ondertitels")
+            info = ydl.extract_info(url, download=True)
+            titel = info.get("title", "ondertitel")
+            taal = "nl" if "nl" in info.get("subtitles", {}) else "en"
+            bestandsnaam = maak_bestandsnaam(titel, taal, formaat)
 
-            if not info.get("subtitles") and not info.get("automatic_captions"):
-                return "Geen ondertitels gevonden", 404
+        if not os.path.exists(bestandsnaam):
+            return "Ondertitelbestand niet gevonden", 500
 
-            ydl.download([url])
+        return send_file(bestandsnaam, as_attachment=True)
+
     except Exception as e:
-        return f"Fout bij downloaden: {str(e)}", 500
-
-    # Verwerk .txt (tijdcodes strippen)
-    if formaat == "txt" and os.path.exists(srt_pad):
-        with open(srt_pad, encoding="utf-8") as f:
-            regels = f.readlines()
-        tekstregels = [r.strip() for r in regels if not r.strip().isdigit() and "-->" not in r and r.strip()]
-        with open(txt_pad, "w", encoding="utf-8") as f:
-            f.write("\n".join(tekstregels))
-
-        downloadnaam = maak_bestandsnaam(titel, taal, "txt")
-        return send_file(txt_pad, as_attachment=True, download_name=downloadnaam)
-
-    # Anders: .srt teruggeven
-    if os.path.exists(srt_pad):
-        downloadnaam = maak_bestandsnaam(titel, taal, "srt")
-        return send_file(srt_pad, as_attachment=True, download_name=downloadnaam)
-    else:
-        return "Bestand niet gevonden", 500
+        return f"Fout tijdens downloaden: {e}", 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
