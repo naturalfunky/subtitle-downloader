@@ -6,7 +6,6 @@ import re
 app = Flask(__name__)
 
 def maak_bestandsnaam(titel: str, taal: str, extensie: str) -> str:
-    # Verwijder ongeldige tekens voor bestandsnamen
     veilig = re.sub(r'[\\/*?:"<>|]', '_', titel)
     return f"{veilig}_{taal}.{extensie}"
 
